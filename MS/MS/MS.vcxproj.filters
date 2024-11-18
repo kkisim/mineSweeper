@@ -27,18 +27,27 @@
     <ClInclude Include="MS.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Ms_Interface.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Ms_Level.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Ms_Logic.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MS.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Desktop\git\vcpp-project\202007011_전성호\202007011_전성호\Ms_Interface.cpp">
+    <ClCompile Include="Ms_Interface.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Desktop\git\vcpp-project\202007011_전성호\202007011_전성호\Ms_Level.cpp">
+    <ClCompile Include="Ms_Level.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Desktop\git\vcpp-project\202007011_전성호\202007011_전성호\Ms_Logic.cpp">
+    <ClCompile Include="Ms_Logic.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -52,6 +61,12 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="MS.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\mine.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\flag.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

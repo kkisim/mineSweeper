@@ -4,6 +4,7 @@
 #include "framework.h"
 #include "MS.h"
 
+
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
@@ -16,6 +17,12 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+
+HBITMAP hMineBitmap = NULL;                     // 지뢰 비트맵 핸들
+HBITMAP hFlagBitmap = NULL;                     // 깃발 비트맵 핸들
+const Ms_level* currentLevel = &Easy;           // 현재 난이도 (기본: Easy)
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -93,24 +100,47 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
 //        주 프로그램 창을 만든 다음 표시합니다.
 //
+
+// 창 크기 계산
+void ResizeWindow(HWND hWnd, const Ms_level& level);
+
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+       CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
+
 
    if (!hWnd)
    {
       return FALSE;
    }
+   // 비트맵 로드
+   hMineBitmap = (HBITMAP)LoadImage(hInstance, L"resources/mine.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+   hFlagBitmap = (HBITMAP)LoadImage(hInstance, L"resources/flag.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+   // 창 크기 조정 (난이도에 따라)
+   ResizeWindow(hWnd, *currentLevel);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
    return TRUE;
 }
+// 창 크기 조정 함수
+void ResizeWindow(HWND hWnd, const Ms_level& level)
+{
+    // 보드 크기 계산
+    int boardWidth = level.getWidth() * CELL_WIDTH;
+    int boardHeight = level.getHeight() * CELL_HEIGHT;
 
+    // 창 크기 조정
+    RECT rect = { 0, 0, boardWidth, boardHeight };
+    AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, TRUE);
+
+    SetWindowPos(hWnd, nullptr, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE | SWP_NOZORDER);
+}
 //
 //  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -126,33 +156,58 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        switch (wmId)
         {
-            int wmId = LOWORD(wParam);
-            // 메뉴 선택을 구문 분석합니다:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
-        break;
+    }
+    break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            EndPaint(hWnd, &ps);
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+
+        // 보드 초기화
+        InitializeBoard(hWnd, *currentLevel);
+
+        // 지뢰 비트맵 테스트 출력
+        if (hMineBitmap) {
+            DrawMine(hdc, hMineBitmap, 50, 50);
         }
-        break;
+
+        // 깃발 비트맵 테스트 출력
+        if (hFlagBitmap) {
+            DrawFlag(hdc, hFlagBitmap, 100, 50);
+        }
+
+        EndPaint(hWnd, &ps);
+    }
+    break;
+
+    case WM_LBUTTONDOWN: // 좌클릭 시
+    {
+        int x = LOWORD(lParam) / CELL_WIDTH;  // 클릭된 셀의 x 좌표
+        int y = HIWORD(lParam) / CELL_HEIGHT; // 클릭된 셀의 y 좌표
+        // TODO: 셀 클릭 로직 추가
+    }
+    break;
+
     case WM_DESTROY:
+        // 비트맵 리소스 해제
+        DeleteObject(hMineBitmap);
+        DeleteObject(hFlagBitmap);
         PostQuitMessage(0);
         break;
+
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

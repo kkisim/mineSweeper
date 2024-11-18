@@ -13,3 +13,9 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+
+//헤더파일들
+#include "Ms_Level.h"
+#include "Ms_Interface.h"
+#include "Ms_Logic.h"
+#include "Ms_Level.cpp"
