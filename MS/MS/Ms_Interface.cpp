@@ -18,6 +18,21 @@ void InitializeBoard(HWND hwnd, const Ms_level& level) {
 
     ReleaseDC(hwnd, hdc);
 }
+// 버튼 및 타이머 초기화
+void InitializeInterface(HWND hwnd) {
+    // 버튼 생성
+    CreateWindowW(L"BUTTON", L"Easy", WS_VISIBLE | WS_CHILD,
+        10, 10, 80, 30, hwnd, (HMENU)ID_BUTTON_EASY, GetModuleHandle(NULL), NULL);
+    CreateWindowW(L"BUTTON", L"Normal", WS_VISIBLE | WS_CHILD,
+        100, 10, 80, 30, hwnd, (HMENU)ID_BUTTON_NORMAL, GetModuleHandle(NULL), NULL);
+    CreateWindowW(L"BUTTON", L"Hard", WS_VISIBLE | WS_CHILD,
+        190, 10, 80, 30, hwnd, (HMENU)ID_BUTTON_HARD, GetModuleHandle(NULL), NULL);
+    CreateWindowW(L"BUTTON", L"Reset", WS_VISIBLE | WS_CHILD,
+        280, 10, 80, 30, hwnd, (HMENU)ID_BUTTON_RESET, GetModuleHandle(NULL), NULL);
+
+    // 타이머 시작
+    SetTimer(hwnd, ID_TIMER, 1000, NULL); // 1초 간격으로 타이머 설정
+}
 
 // 단일 셀 그리기
 void DrawCell(HDC hdc, int x, int y, COLORREF color) {

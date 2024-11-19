@@ -151,26 +151,48 @@ void ResizeWindow(HWND hWnd, const Ms_level& level)
 //  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
 //
 //
+//경과 시간 저장
+static int timerCount = 0;
+
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_CREATE:
+        InitializeInterface(hWnd); // 인터페이스 초기화
+        break;
     case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        switch (wmId)
-        {
-        case IDM_ABOUT:
-            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+        switch (LOWORD(wParam)) {
+        case ID_BUTTON_EASY:
+            currentLevel = &Easy;
+            InvalidateRect(hWnd, NULL, TRUE); // 보드 갱신
             break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
+        case ID_BUTTON_NORMAL:
+            currentLevel = &Normal;
+            InvalidateRect(hWnd, NULL, TRUE);
             break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
+        case ID_BUTTON_HARD:
+            currentLevel = &Hard;
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
+        case ID_BUTTON_RESET:
+            timerCount = 0; // 타이머 초기화
+            InvalidateRect(hWnd, NULL, TRUE);
+            break;
         }
-    }
-    break;
+        break;
+    case WM_TIMER:
+        if (wParam == ID_TIMER) {
+            timerCount++;
+            HDC hdc = GetDC(hWnd);
+            WCHAR timerText[20];
+            swprintf_s(timerText, L"Time: %d", timerCount);
+            TextOutW(hdc, 400, 10, timerText, wcslen(timerText));
+            ReleaseDC(hWnd, hdc);
+        }
+        break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;

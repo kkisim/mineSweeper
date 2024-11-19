@@ -9,6 +9,20 @@
 #define CELL_WIDTH 32
 #define CELL_HEIGHT 32
 
+// 버튼 ID 정의
+#define ID_BUTTON_EASY    101
+#define ID_BUTTON_NORMAL  102
+#define ID_BUTTON_HARD    103
+#define ID_BUTTON_RESET   104
+
+
+// 타이머 ID 정의
+#define ID_TIMER          201
+
+// 인터페이스 초기화 함수 선언
+void InitializeInterface(HWND hwnd);
+
+
 // 함수 선언
 
 // 보드를 초기화합니다.
