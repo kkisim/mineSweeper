@@ -103,44 +103,80 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 // 창 크기 계산
 void ResizeWindow(HWND hWnd, const Ms_level& level);
-
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-   hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
-
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
-
-
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-   // 비트맵 로드
-   hMineBitmap = (HBITMAP)LoadImage(hInstance, L"resources/mine.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-   hFlagBitmap = (HBITMAP)LoadImage(hInstance, L"resources/flag.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
-   // 창 크기 조정 (난이도에 따라)
-   ResizeWindow(hWnd, *currentLevel);
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-
-   return TRUE;
-}
-// 창 크기 조정 함수
-void ResizeWindow(HWND hWnd, const Ms_level& level)
-{
-    // 보드 크기 계산
+void ResizeWindow(HWND hWnd, const Ms_level& level) {
     int boardWidth = level.getWidth() * CELL_WIDTH;
     int boardHeight = level.getHeight() * CELL_HEIGHT;
 
-    // 창 크기 조정
-    RECT rect = { 0, 0, boardWidth, boardHeight };
+    // 클라이언트 영역 크기 설정 (보드 크기 + 상단 UI)
+    int clientWidth = boardWidth;
+    int clientHeight = boardHeight + 100; // 100: 타이머와 버튼 높이 포함
+
+    // 전체 창 크기 계산
+    RECT rect = { 0, 0, clientWidth, clientHeight };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, TRUE);
 
-    SetWindowPos(hWnd, nullptr, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE | SWP_NOZORDER);
+    // 창 크기 조정
+    SetWindowPos(hWnd, NULL, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE | SWP_NOZORDER);
 }
+
+
+
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
+    hInst = hInstance;
+
+    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+
+    if (!hWnd)
+        return FALSE;
+
+    // 창 크기 설정
+    ResizeWindow(hWnd, *currentLevel);
+
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
+
+    return TRUE;
+}
+
+
+//BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+//{
+//   hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+//
+//   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+//       CW_USEDEFAULT, 0, 800, 600, nullptr, nullptr, hInstance, nullptr);
+//
+//
+//   if (!hWnd)
+//   {
+//      return FALSE;
+//   }
+//   // 비트맵 로드
+//   hMineBitmap = (HBITMAP)LoadImage(hInstance, L"resources/mine.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+//   hFlagBitmap = (HBITMAP)LoadImage(hInstance, L"resources/flag.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+//
+//   // 창 크기 조정 (난이도에 따라)
+//   ResizeWindow(hWnd, *currentLevel);
+//
+//   ShowWindow(hWnd, nCmdShow);
+//   UpdateWindow(hWnd);
+//
+//   return TRUE;
+//}
+// 창 크기 조정 함수
+//void ResizeWindow(HWND hWnd, const Ms_level& level)
+//{
+//    // 보드 크기 계산
+//    int boardWidth = level.getWidth() * CELL_WIDTH;
+//    int boardHeight = level.getHeight() * CELL_HEIGHT;
+//
+//    // 창 크기 조정
+//    RECT rect = { 0, 0, boardWidth, boardHeight };
+//    AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, TRUE);
+//
+//    SetWindowPos(hWnd, nullptr, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOMOVE | SWP_NOZORDER);
+//}
 //
 //  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -152,80 +188,175 @@ void ResizeWindow(HWND hWnd, const Ms_level& level)
 //
 //
 //경과 시간 저장
+
 static int timerCount = 0;
-
-
-
+// 현재 난이도와 연동된 Ms_Logic 객체
+Ms_Logic logic(Easy.getWidth(), Easy.getHeight(), Easy.getMines());
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_CREATE:
-        InitializeInterface(hWnd); // 인터페이스 초기화
+        InitializeInterface(hWnd); // 인터페이스 초기화 (타이머 및 버튼 생성)
         break;
+
+    case WM_LBUTTONDOWN: { // 왼쪽 클릭
+        int x = LOWORD(lParam) / CELL_WIDTH; // 셀 X 좌표
+        int y = (HIWORD(lParam) - 100) / CELL_HEIGHT; // 셀 Y 좌표 (상단 UI 높이 제외)
+
+        if (y >= 0) { // 유효한 셀 클릭 처리
+            logic.RevealCell(x, y); // 셀 열기
+
+            if (logic.IsGameOver()) { // 게임 종료 시
+                MessageBox(hWnd, L"Game Over!", L"지뢰찾기", MB_OK);
+                logic.InitializeBoard(); // 게임 재시작
+            }
+            else if (logic.IsGameWon()) { // 승리 조건 달성 시
+                MessageBox(hWnd, L"You Win!", L"지뢰찾기", MB_OK);
+                logic.InitializeBoard(); // 게임 재시작
+            }
+
+            InvalidateRect(hWnd, NULL, TRUE); // 화면 갱신
+        }
+        break;
+    }
+
+    case WM_RBUTTONDOWN: { // 오른쪽 클릭
+        int x = LOWORD(lParam) / CELL_WIDTH; // 셀 X 좌표
+        int y = (HIWORD(lParam) - 100) / CELL_HEIGHT; // 셀 Y 좌표 (상단 UI 높이 제외)
+
+        if (y >= 0) { // 유효한 셀 클릭 처리
+            logic.ToggleFlag(x, y); // 깃발 설정/해제
+            InvalidateRect(hWnd, NULL, TRUE); // 화면 갱신
+        }
+        break;
+    }
+
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
-        case ID_BUTTON_EASY:
+        case ID_32771: // Easy 난이도
             currentLevel = &Easy;
-            InvalidateRect(hWnd, NULL, TRUE); // 보드 갱신
+            logic = Ms_Logic(Easy.getWidth(), Easy.getHeight(), Easy.getMines());
+            logic.InitializeBoard();
+            ResizeWindow(hWnd, *currentLevel);
+            InvalidateRect(hWnd, NULL, TRUE);
             break;
-        case ID_BUTTON_NORMAL:
+
+        case ID_32772: // Normal 난이도
             currentLevel = &Normal;
+            logic = Ms_Logic(Normal.getWidth(), Normal.getHeight(), Normal.getMines());
+            logic.InitializeBoard();
+            ResizeWindow(hWnd, *currentLevel);
             InvalidateRect(hWnd, NULL, TRUE);
             break;
-        case ID_BUTTON_HARD:
+
+        case ID_32773: // Hard 난이도
             currentLevel = &Hard;
+            logic = Ms_Logic(Hard.getWidth(), Hard.getHeight(), Hard.getMines());
+            logic.InitializeBoard();
+            ResizeWindow(hWnd, *currentLevel);
             InvalidateRect(hWnd, NULL, TRUE);
             break;
+
         case ID_BUTTON_RESET:
-            timerCount = 0; // 타이머 초기화
+            logic.InitializeBoard();
             InvalidateRect(hWnd, NULL, TRUE);
             break;
         }
         break;
+    case WM_SIZE: {
+        int width = LOWORD(lParam);  // 창의 너비
+        int height = HIWORD(lParam); // 창의 높이
+
+        // 타이머 컨트롤의 크기 및 위치 계산 (오른쪽 상단)
+        int timerWidth = 120;
+        int timerHeight = 30;
+        int timerX = width - timerWidth - 10; // 오른쪽 여백 10 픽셀
+        int timerY = 10;                     // 상단 여백 10 픽셀
+
+        HWND hTimer = GetDlgItem(hWnd, ID_TIMER);
+        if (hTimer) {
+            MoveWindow(hTimer, timerX, timerY, timerWidth, timerHeight, TRUE);
+        }
+
+        break;
+    }
+
+
     case WM_TIMER:
         if (wParam == ID_TIMER) {
-            timerCount++;
-            HDC hdc = GetDC(hWnd);
-            WCHAR timerText[20];
-            swprintf_s(timerText, L"Time: %d", timerCount);
-            TextOutW(hdc, 400, 10, timerText, wcslen(timerText));
-            ReleaseDC(hWnd, hdc);
+            timerCount++; // 타이머 값 증가
+
+            // 타이머 값을 문자열로 변환하여 표시
+            HWND hTimer = GetDlgItem(hWnd, ID_TIMER);
+            if (hTimer) {
+                WCHAR timerText[20];
+                swprintf_s(timerText, L"Time: %d", timerCount);
+                SetWindowTextW(hTimer, timerText); // 타이머 텍스트 업데이트
+            }
         }
         break;
-    case WM_PAINT:
-    {
+
+
+    case WM_PAINT: {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
 
-        // 보드 초기화
-        InitializeBoard(hWnd, *currentLevel);
+        // 백 버퍼 생성
+        HDC memDC = CreateCompatibleDC(hdc);
+        RECT rect;
+        GetClientRect(hWnd, &rect);
+        HBITMAP hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+        HBITMAP oldBitmap = (HBITMAP)SelectObject(memDC, hBitmap);
 
-        // 지뢰 비트맵 테스트 출력
-        if (hMineBitmap) {
-            DrawMine(hdc, hMineBitmap, 50, 50);
+        // 백 버퍼 초기화
+        FillRect(memDC, &rect, (HBRUSH)(COLOR_WINDOW + 1));
+
+        // 보드 및 셀 그리기
+        const auto& board = logic.GetBoard();
+        for (int y = 0; y < board.size(); ++y) {
+            for (int x = 0; x < board[y].size(); ++x) {
+                int startX = x * CELL_WIDTH;
+                int startY = y * CELL_HEIGHT + 100; // 상단 UI 높이 제외
+                if (board[y][x].isRevealed) {
+                    if (board[y][x].isMine) {
+                        DrawMine(memDC, hMineBitmap, startX, startY);
+                    }
+                    else {
+                        DrawCell(memDC, startX, startY, RGB(255, 255, 255));
+                        if (board[y][x].surroundingMines > 0) {
+                            WCHAR text[2];
+                            swprintf_s(text, L"%d", board[y][x].surroundingMines);
+                            TextOutW(memDC, startX + CELL_WIDTH / 3, startY + CELL_HEIGHT / 4, text, 1);
+                        }
+                    }
+                }
+                else {
+                    if (board[y][x].isFlagged) {
+                        DrawFlag(memDC, hFlagBitmap, startX, startY);
+                    }
+                    else {
+                        DrawCell(memDC, startX, startY, RGB(200, 200, 200));
+                    }
+                }
+            }
         }
 
-        // 깃발 비트맵 테스트 출력
-        if (hFlagBitmap) {
-            DrawFlag(hdc, hFlagBitmap, 100, 50);
-        }
+        // 백 버퍼에서 화면으로 출력
+        BitBlt(hdc, 0, 0, rect.right, rect.bottom, memDC, 0, 0, SRCCOPY);
+
+        // 메모리 해제
+        SelectObject(memDC, oldBitmap);
+        DeleteObject(hBitmap);
+        DeleteDC(memDC);
 
         EndPaint(hWnd, &ps);
+        break;
     }
-    break;
-
-    case WM_LBUTTONDOWN: // 좌클릭 시
-    {
-        int x = LOWORD(lParam) / CELL_WIDTH;  // 클릭된 셀의 x 좌표
-        int y = HIWORD(lParam) / CELL_HEIGHT; // 클릭된 셀의 y 좌표
-        // TODO: 셀 클릭 로직 추가
-    }
-    break;
 
     case WM_DESTROY:
-        // 비트맵 리소스 해제
-        DeleteObject(hMineBitmap);
+        KillTimer(hWnd, ID_TIMER); // 타이머 제거
+        DeleteObject(hMineBitmap); // 리소스 해제
         DeleteObject(hFlagBitmap);
         PostQuitMessage(0);
         break;
@@ -233,8 +364,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+
     return 0;
 }
+
 
 // 정보 대화 상자의 메시지 처리기입니다.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
