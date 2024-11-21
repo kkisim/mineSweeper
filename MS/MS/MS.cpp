@@ -236,6 +236,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (LOWORD(wParam)) {
         case ID_32771: // Easy 난이도
             currentLevel = &Easy;
+            timerCount = -1;
             logic = Ms_Logic(Easy.getWidth(), Easy.getHeight(), Easy.getMines());
             logic.InitializeBoard();
             ResizeWindow(hWnd, *currentLevel);
@@ -244,6 +245,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case ID_32772: // Normal 난이도
             currentLevel = &Normal;
+            timerCount = -1;
             logic = Ms_Logic(Normal.getWidth(), Normal.getHeight(), Normal.getMines());
             logic.InitializeBoard();
             ResizeWindow(hWnd, *currentLevel);
@@ -252,6 +254,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case ID_32773: // Hard 난이도
             currentLevel = &Hard;
+            timerCount = -1;
             logic = Ms_Logic(Hard.getWidth(), Hard.getHeight(), Hard.getMines());
             logic.InitializeBoard();
             ResizeWindow(hWnd, *currentLevel);
@@ -259,7 +262,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
 
         case ID_BUTTON_RESET:
+            timerCount = -1;
             logic.InitializeBoard();
+            
             InvalidateRect(hWnd, NULL, TRUE);
             break;
         }
