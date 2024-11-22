@@ -3,117 +3,158 @@
 #include <ctime>
 #include <queue>
 
-// 생성자
-Ms_Logic::Ms_Logic(int width, int height, int mines)
-    : width(width), height(height), mineCount(mines), gameOver(false), gameWon(false) {
+// 생성자: 보드의 크기, 지뢰 개수, 탐색 방식(BFS 또는 DFS)을 초기화합니다.
+Ms_Logic::Ms_Logic(int width, int height, int mines, bool useBFS)
+    : width(width), height(height), mineCount(mines), remainingMines(mines),
+    gameOver(false), gameWon(false), useBFS(useBFS) {
+    // 보드 상태를 저장하는 2D 배열 초기화
     mineField.resize(height, std::vector<Cell>(width));
     InitializeBoard();
 }
 
-// 보드 초기화
+// 보드 초기화: 각 셀의 상태를 기본값으로 설정
 void Ms_Logic::InitializeBoard() {
-    for (auto& row : mineField) {
-        for (auto& cell : row) {
-            cell.isMine = false;
-            cell.isRevealed = false;
-            cell.isFlagged = false;
-            cell.surroundingMines = 0;
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            mineField[i][j].isMine = false;          // 지뢰 여부 초기화
+            mineField[i][j].isRevealed = false;      // 열림 상태 초기화
+            mineField[i][j].isFlagged = false;       // 깃발 상태 초기화
+            mineField[i][j].surroundingMines = 0;    // 주변 지뢰 개수 초기화
+            mineField[i][j].isClicked = false;       // 클릭 상태 초기화
         }
     }
 }
 
-// 지뢰 배치
+// 지뢰 배치: 보드에 지뢰를 무작위로 배치
 void Ms_Logic::PlaceMines(int startX, int startY, int exclusionRadius) {
-    srand(static_cast<unsigned>(time(0)));
+    srand(static_cast<unsigned>(time(0))); // 랜덤 시드 설정
     int placedMines = 0;
 
     while (placedMines < mineCount) {
         int x = rand() % width;
         int y = rand() % height;
 
+        // 배치 조건: 지뢰가 없는 셀이고, 시작 위치 및 반경 제외
         if (!mineField[y][x].isMine &&
             !(x >= startX - exclusionRadius && x <= startX + exclusionRadius &&
                 y >= startY - exclusionRadius && y <= startY + exclusionRadius)) {
-            mineField[y][x].isMine = true;
+            mineField[y][x].isMine = true; // 지뢰 배치
             placedMines++;
         }
     }
 }
 
-// 주변 지뢰 개수 계산
+// 주변 지뢰 개수 계산: 각 셀에 인접한 지뢰 개수를 계산
 void Ms_Logic::CalculateSurroundingMines() {
-    int dx[] = { -1, -1, -1, 0, 1, 1, 1, 0 };
-    int dy[] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+    int dx[] = { -1, -1, -1, 0, 1, 1, 1, 0 }; // 8방향 X 좌표
+    int dy[] = { -1, 0, 1, 1, 1, 0, -1, -1 }; // 8방향 Y 좌표
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            if (mineField[y][x].isMine) continue;
+            if (mineField[y][x].isMine) continue; // 지뢰가 있는 셀은 건너뜀
 
             int count = 0;
             for (int i = 0; i < 8; ++i) {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
 
+                // 경계 내의 지뢰 개수 카운트
                 if (nx >= 0 && nx < width && ny >= 0 && ny < height && mineField[ny][nx].isMine) {
                     count++;
                 }
             }
-            mineField[y][x].surroundingMines = count;
+            mineField[y][x].surroundingMines = count; // 주변 지뢰 개수 저장
         }
     }
 }
 
-// 특정 셀 열기
-void Ms_Logic::RevealCell(int x, int y) {
+// 특정 셀 열기: 클릭된 셀 및 인접 셀들을 탐색하여 열기
+std::vector<std::pair<int, int>> Ms_Logic::RevealCell(int x, int y) {
+    std::vector<std::pair<int, int>> revealedCells; // 탐색된 셀 좌표 저장
+
+    // 경계 조건 및 이미 열린 셀, 플래그가 있는 셀은 무시
     if (x < 0 || x >= width || y < 0 || y >= height || mineField[y][x].isRevealed || mineField[y][x].isFlagged) {
-        return;
+        return revealedCells;
     }
 
+    // 현재 셀 열기 및 좌표 저장
+    mineField[y][x].isRevealed = true;
+    revealedCells.push_back(std::make_pair(x, y));
+
+    // 클릭한 셀이 지뢰인 경우 게임 종료
     if (mineField[y][x].isMine) {
         gameOver = true;
-        return;
+        return revealedCells;
     }
 
-    mineField[y][x].isRevealed = true;
-
+    // 주변 지뢰가 없는 경우 BFS 또는 DFS로 인접 셀 탐색
     if (mineField[y][x].surroundingMines == 0) {
-        RevealAdjacentCells(x, y);
+        if (useBFS) {
+            RevealAdjacentCellsBFS(x, y, revealedCells);
+        }
+        else {
+            RevealAdjacentCellsDFS(x, y, revealedCells);
+        }
     }
 
-    CheckWinCondition();
+    return revealedCells; // 탐색된 셀 좌표 반환
 }
 
-// 빈 칸 주변 셀 열기
-void Ms_Logic::RevealAdjacentCells(int x, int y) {
-    std::queue<std::pair<int, int>> q;
-    q.push({ x, y });
+// BFS 탐색: 빈 칸 주변 열기
+void Ms_Logic::RevealAdjacentCellsBFS(int x, int y, std::vector<std::pair<int, int>>& revealedCells) {
+    std::queue<std::pair<int, int>> q; // 탐색 큐
+    q.push(std::make_pair(x, y));
 
-    int dx[] = { -1, -1, -1, 0, 1, 1, 1, 0 };
-    int dy[] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+    int dx[] = { -1, -1, -1, 0, 1, 1, 1, 0 }; // 8방향 X 좌표
+    int dy[] = { -1, 0, 1, 1, 1, 0, -1, -1 }; // 8방향 Y 좌표
 
     while (!q.empty()) {
-        std::pair<int, int> current = q.front(); // 큐의 front() 값 가져오기
+        std::pair<int, int> current = q.front();
         q.pop();
 
-        int cx = current.first;  // 현재 셀의 X 좌표
-        int cy = current.second; // 현재 셀의 Y 좌표
+        int cx = current.first;
+        int cy = current.second;
 
         for (int i = 0; i < 8; ++i) {
             int nx = cx + dx[i];
             int ny = cy + dy[i];
 
+            // 경계 조건 및 이미 열린 셀 제외
             if (nx >= 0 && nx < width && ny >= 0 && ny < height &&
                 !mineField[ny][nx].isRevealed && !mineField[ny][nx].isMine) {
                 mineField[ny][nx].isRevealed = true;
+                revealedCells.push_back(std::make_pair(nx, ny)); // 열린 셀 좌표 저장
 
+                // 주변 지뢰가 없는 경우 큐에 추가
                 if (mineField[ny][nx].surroundingMines == 0) {
-                    q.push({ nx, ny });
+                    q.push(std::make_pair(nx, ny));
                 }
             }
         }
     }
 }
 
+// DFS 탐색: 빈 칸 주변 열기
+void Ms_Logic::RevealAdjacentCellsDFS(int x, int y, std::vector<std::pair<int, int>>& revealedCells) {
+    int dx[] = { -1, -1, -1, 0, 1, 1, 1, 0 }; // 8방향 X 좌표
+    int dy[] = { -1, 0, 1, 1, 1, 0, -1, -1 }; // 8방향 Y 좌표
+
+    for (int i = 0; i < 8; ++i) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+
+        if (nx >= 0 && nx < width && ny >= 0 && ny < height &&
+            !mineField[ny][nx].isRevealed && !mineField[ny][nx].isMine) {
+            mineField[ny][nx].isRevealed = true;
+            revealedCells.push_back(std::make_pair(nx, ny)); // 열린 셀 좌표 저장
+
+            // 주변 지뢰가 없는 경우 재귀적으로 탐색
+            if (mineField[ny][nx].surroundingMines == 0) {
+                RevealAdjacentCellsDFS(nx, ny, revealedCells);
+            }
+        }
+    }
+}
 
 // 깃발 설정/해제
 void Ms_Logic::ToggleFlag(int x, int y) {
@@ -121,7 +162,14 @@ void Ms_Logic::ToggleFlag(int x, int y) {
         return;
     }
 
-    mineField[y][x].isFlagged = !mineField[y][x].isFlagged;
+    if (mineField[y][x].isFlagged) {
+        mineField[y][x].isFlagged = false;
+        remainingMines++;
+    }
+    else {
+        mineField[y][x].isFlagged = true;
+        remainingMines--;
+    }
 }
 
 // 게임 종료 여부 반환
@@ -138,10 +186,10 @@ bool Ms_Logic::IsGameWon() const {
 void Ms_Logic::CheckWinCondition() {
     gameWon = true;
 
-    for (const auto& row : mineField) {
-        for (const auto& cell : row) {
-            if (!cell.isMine && !cell.isRevealed) {
-                gameWon = false;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            if (!mineField[y][x].isMine && !mineField[y][x].isRevealed) {
+                gameWon = false; // 모든 비지뢰 셀이 열리지 않으면 승리 조건 미달성
                 return;
             }
         }
@@ -151,4 +199,16 @@ void Ms_Logic::CheckWinCondition() {
 // 보드 상태 반환
 const std::vector<std::vector<Cell>>& Ms_Logic::GetBoard() const {
     return mineField;
+}
+
+// 셀 클릭 상태 설정
+void Ms_Logic::SetCellClicked(int x, int y, bool clicked) {
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+        mineField[y][x].isClicked = clicked;
+    }
+}
+
+// 남은 지뢰 개수 반환
+int Ms_Logic::GetRemainingMines() const {
+    return remainingMines;
 }

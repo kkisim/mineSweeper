@@ -63,11 +63,46 @@
     <Image Include="MS.ico">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="..\mine.bmp">
+    <Image Include="..\..\..\..\..\지뢰찾기\MFC-MineSweeper\Mine\res\Mine.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\지뢰찾기\MFC-MineSweeper\Mine\res\MineDoc.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\adjbomb.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\bomb.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\cell.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\cell_clicked.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\explode.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="..\flag.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
+    <Image Include="..\Mine.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\number.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\qmark.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="..\wrong.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\지뢰찾기\MFC-MineSweeper\Mine\res\Mine.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>
