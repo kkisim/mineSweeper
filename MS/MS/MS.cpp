@@ -245,7 +245,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         int x = LOWORD(lParam) / CELL_WIDTH;
         int y = (HIWORD(lParam) - 100) / CELL_HEIGHT;
 
+        // 좌표 범위 확인
         if (y >= 0 && x >= 0 && x < logic.GetBoard()[0].size() && y < logic.GetBoard().size()) {
+            const Cell& clickedCell = logic.GetBoard()[y][x];
+
+            // 숫자나 깃발이 있는 셀은 클릭 불가
+            if (clickedCell.isFlagged || (clickedCell.isRevealed && clickedCell.surroundingMines > 0)) {
+                break;
+            }
+
             logic.SetCellClicked(x, y, true); // 셀을 눌린 상태로 설정
 
             // 클릭된 셀만 갱신
@@ -260,31 +268,62 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    case WM_LBUTTONUP: {
-        int x = LOWORD(lParam) / CELL_WIDTH;
-        int y = (HIWORD(lParam) - 100) / CELL_HEIGHT;
 
+    case WM_LBUTTONUP: {
+        int x = LOWORD(lParam) / CELL_WIDTH; // 클릭한 셀의 X 좌표
+        int y = (HIWORD(lParam) - 100) / CELL_HEIGHT; // 클릭한 셀의 Y 좌표 (UI 영역 보정)
+
+        // 보드 범위 내인지 확인
         if (y >= 0 && x >= 0 && x < logic.GetBoard()[0].size() && y < logic.GetBoard().size()) {
             logic.SetCellClicked(x, y, false); // 클릭 상태 해제
-            logic.RevealCell(x, y);           // 셀 열기
 
-            // 탐색된 셀들만 갱신
-            for (int row = 0; row < logic.GetBoard().size(); ++row) {
-                for (int col = 0; col < logic.GetBoard()[0].size(); ++col) {
-                    if (logic.GetBoard()[row][col].isRevealed) {
-                        RECT cellRect = {
-                            col * CELL_WIDTH,
-                            row * CELL_HEIGHT + 100,
-                            (col + 1) * CELL_WIDTH,
-                            (row + 1) * CELL_HEIGHT + 100
-                        };
-                        InvalidateRect(hWnd, &cellRect, TRUE);
+            // 셀 열기 및 드러난 셀들 갱신
+            auto revealedCells = logic.RevealCell(x, y); // 탐색된 셀 좌표 반환
+            for (const auto& cell : revealedCells) {
+                RECT cellRect = {
+                    cell.first * CELL_WIDTH,
+                    cell.second * CELL_HEIGHT + 100, // UI 영역 보정
+                    (cell.first + 1) * CELL_WIDTH,
+                    (cell.second + 1) * CELL_HEIGHT + 100
+                };
+                InvalidateRect(hWnd, &cellRect, TRUE); // 탐색된 각 셀 갱신
+            }
+
+            // 게임 오버 확인
+            if (logic.IsGameOver()) {
+                // 모든 지뢰 드러내기
+                for (int row = 0; row < logic.GetBoard().size(); ++row) {
+                    for (int col = 0; col < logic.GetBoard()[0].size(); ++col) {
+                        if (logic.GetBoard()[row][col].isMine) {
+                            RECT cellRect = {
+                                col * CELL_WIDTH,
+                                row * CELL_HEIGHT + 100,
+                                (col + 1) * CELL_WIDTH,
+                                (row + 1) * CELL_HEIGHT + 100
+                            };
+                            InvalidateRect(hWnd, &cellRect, TRUE); // 지뢰를 화면에 갱신
+                        }
                     }
+                }
+
+                // 게임 오버 메시지 표시
+                if (MessageBox(hWnd, L"Game Over!", L"Game Over", MB_ICONERROR | MB_OK) == IDOK) {
+                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0); // 리셋 버튼 기능 실행
+                }
+            }
+            // 게임 승리 확인
+            else if (logic.IsGameWon()) {
+                // 게임 승리 메시지 표시
+                if (MessageBox(hWnd, L"Congratulations!", L"Victory", MB_ICONINFORMATION | MB_OK) == IDOK) {
+                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0); // 리셋 버튼 기능 실행
                 }
             }
         }
         break;
     }
+
+
+
 
 
     case WM_RBUTTONDOWN: { // 오른쪽 클릭 이벤트
@@ -304,7 +343,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             currentLevel = &Easy;
             timerCount = 0;
             logic = Ms_Logic(Easy.getWidth(), Easy.getHeight(), Easy.getMines(), false); // DFS 사용
-            logic.InitializeBoard();
+            
+            logic.InitializeBoard(); // 보드 초기화
+            logic.PlaceMines(-1, -1, 0); // 지뢰 배치 (처음 클릭 위치가 없으므로 -1, -1 전달)
+            logic.CalculateSurroundingMines(); // 주변 지뢰 수 계산
             ResizeWindow(hWnd, *currentLevel);
             InvalidateRect(hWnd, NULL, TRUE);
             break;
@@ -313,7 +355,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             currentLevel = &Normal;
             timerCount = 0;
             logic = Ms_Logic(Normal.getWidth(), Normal.getHeight(), Normal.getMines(), true); // BFS 사용
-            logic.InitializeBoard();
+            logic.InitializeBoard(); // 보드 초기화
+            logic.PlaceMines(-1, -1, 0); // 지뢰 배치 (처음 클릭 위치가 없으므로 -1, -1 전달)
+            logic.CalculateSurroundingMines(); // 주변 지뢰 수 계산
             ResizeWindow(hWnd, *currentLevel);
             InvalidateRect(hWnd, NULL, TRUE);
             break;
@@ -322,17 +366,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             currentLevel = &Hard;
             timerCount = 0;
             logic = Ms_Logic(Hard.getWidth(), Hard.getHeight(), Hard.getMines(), true); // BFS 사용
-            logic.InitializeBoard();
+            logic.InitializeBoard(); // 보드 초기화
+            logic.PlaceMines(-1, -1, 0); // 지뢰 배치 (처음 클릭 위치가 없으므로 -1, -1 전달)
+            logic.CalculateSurroundingMines(); // 주변 지뢰 수 계산
             ResizeWindow(hWnd, *currentLevel);
             InvalidateRect(hWnd, NULL, TRUE);
             break;
         case ID_BUTTON_RESET:
-            timerCount = 0;
-            logic.InitializeBoard(); // 보드 초기화
-            logic.PlaceMines(-1, -1, 0); // 지뢰 배치 (처음 클릭 위치가 없으므로 -1, -1 전달)
-            logic.CalculateSurroundingMines(); // 주변 지뢰 수 계산
-            InvalidateRect(hWnd, NULL, TRUE);
+            timerCount = 0;                        // 타이머 초기화
+            logic.InitializeBoard();               // 보드 초기화
+            logic.PlaceMines(-1, -1, 0);           // 지뢰 배치 (처음 클릭 위치 없음)
+            logic.CalculateSurroundingMines();     // 주변 지뢰 수 계산
+
+            // 게임 상태 초기화
+            logic.ResetGameState();                // 게임 오버, 승리 상태 초기화
+
+            InvalidateRect(hWnd, NULL, TRUE);      // 화면 갱신
             break;
+
         }
         break;
 

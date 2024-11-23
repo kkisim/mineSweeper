@@ -68,26 +68,36 @@ void Ms_Logic::CalculateSurroundingMines() {
     }
 }
 
-// 특정 셀 열기: 클릭된 셀 및 인접 셀들을 탐색하여 열기
 std::vector<std::pair<int, int>> Ms_Logic::RevealCell(int x, int y) {
-    std::vector<std::pair<int, int>> revealedCells; // 탐색된 셀 좌표 저장
+    std::vector<std::pair<int, int>> revealedCells;
 
-    // 경계 조건 및 이미 열린 셀, 플래그가 있는 셀은 무시
+    // 경계 조건: 보드의 범위를 벗어나거나 이미 열려 있거나 플래그가 설정된 셀은 무시합니다.
     if (x < 0 || x >= width || y < 0 || y >= height || mineField[y][x].isRevealed || mineField[y][x].isFlagged) {
         return revealedCells;
     }
 
-    // 현재 셀 열기 및 좌표 저장
+    // 현재 셀을 열고 해당 좌표를 탐색된 셀 목록에 추가합니다.
     mineField[y][x].isRevealed = true;
     revealedCells.push_back(std::make_pair(x, y));
 
-    // 클릭한 셀이 지뢰인 경우 게임 종료
+    // 클릭한 셀이 지뢰인 경우
     if (mineField[y][x].isMine) {
-        gameOver = true;
-        return revealedCells;
+        gameOver = true; // 게임 상태를 게임 오버로 설정
+
+        // 모든 지뢰를 드러냅니다.
+        for (int row = 0; row < height; ++row) {
+            for (int col = 0; col < width; ++col) {
+                if (mineField[row][col].isMine) {
+                    mineField[row][col].isRevealed = true;
+                    revealedCells.push_back(std::make_pair(col, row)); // 지뢰의 좌표를 추가
+                }
+            }
+        }
+
+        return revealedCells; // 지뢰를 클릭했으므로 탐색을 종료하고 반환합니다.
     }
 
-    // 주변 지뢰가 없는 경우 BFS 또는 DFS로 인접 셀 탐색
+    // 주변 지뢰가 없는 경우 BFS 또는 DFS를 사용하여 인접 셀 탐색
     if (mineField[y][x].surroundingMines == 0) {
         if (useBFS) {
             RevealAdjacentCellsBFS(x, y, revealedCells);
@@ -97,8 +107,10 @@ std::vector<std::pair<int, int>> Ms_Logic::RevealCell(int x, int y) {
         }
     }
 
-    return revealedCells; // 탐색된 셀 좌표 반환
+    return revealedCells; // 탐색된 모든 셀의 좌표를 반환합니다.
 }
+
+
 
 // BFS 탐색: 빈 칸 주변 열기
 void Ms_Logic::RevealAdjacentCellsBFS(int x, int y, std::vector<std::pair<int, int>>& revealedCells) {
@@ -211,4 +223,12 @@ void Ms_Logic::SetCellClicked(int x, int y, bool clicked) {
 // 남은 지뢰 개수 반환
 int Ms_Logic::GetRemainingMines() const {
     return remainingMines;
+}
+
+
+// Ms_Logic.cpp에 정의 추가
+void Ms_Logic::ResetGameState() {
+    gameOver = false;  // 게임 오버 상태 초기화
+    gameWon = false;   // 게임 승리 상태 초기화
+    remainingMines = mineCount;  // 남은 지뢰 개수 초기화
 }

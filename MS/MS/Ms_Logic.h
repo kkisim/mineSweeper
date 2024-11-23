@@ -88,6 +88,11 @@ public:
      */
     void SetCellClicked(int x, int y, bool clicked);
 
+    /**
+     * @brief 게임 상태를 초기화합니다.
+     */
+    void ResetGameState(); // **새롭게 추가된 메서드 선언**
+
 private:
     int width;                                // 보드의 가로 크기
     int height;                               // 보드의 세로 크기
