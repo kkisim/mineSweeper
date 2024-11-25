@@ -107,8 +107,12 @@ std::vector<std::pair<int, int>> Ms_Logic::RevealCell(int x, int y) {
         }
     }
 
+    // **여기에 승리 조건 확인 로직 추가**
+    CheckWinCondition(); // 모든 비지뢰 셀이 열렸는지 확인
+
     return revealedCells; // 탐색된 모든 셀의 좌표를 반환합니다.
 }
+
 
 
 
@@ -196,17 +200,25 @@ bool Ms_Logic::IsGameWon() const {
 
 // 승리 조건 확인
 void Ms_Logic::CheckWinCondition() {
-    gameWon = true;
+    gameWon = true; // 기본값: 승리로 설정
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
+            // 지뢰가 아닌 셀은 반드시 열려 있어야 함
             if (!mineField[y][x].isMine && !mineField[y][x].isRevealed) {
-                gameWon = false; // 모든 비지뢰 셀이 열리지 않으면 승리 조건 미달성
+                gameWon = false;
+                return;
+            }
+            // 지뢰가 있는 셀은 반드시 깃발이 꽂혀 있어야 함
+            if (mineField[y][x].isMine && !mineField[y][x].isFlagged) {
+                gameWon = false;
                 return;
             }
         }
     }
 }
+
+
 
 // 보드 상태 반환
 const std::vector<std::vector<Cell>>& Ms_Logic::GetBoard() const {

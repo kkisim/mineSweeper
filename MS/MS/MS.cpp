@@ -270,28 +270,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
     case WM_LBUTTONUP: {
-        int x = LOWORD(lParam) / CELL_WIDTH; // 클릭한 셀의 X 좌표
-        int y = (HIWORD(lParam) - 100) / CELL_HEIGHT; // 클릭한 셀의 Y 좌표 (UI 영역 보정)
+        int x = LOWORD(lParam) / CELL_WIDTH;
+        int y = (HIWORD(lParam) - 100) / CELL_HEIGHT;
 
-        // 보드 범위 내인지 확인
         if (y >= 0 && x >= 0 && x < logic.GetBoard()[0].size() && y < logic.GetBoard().size()) {
             logic.SetCellClicked(x, y, false); // 클릭 상태 해제
 
-            // 셀 열기 및 드러난 셀들 갱신
-            auto revealedCells = logic.RevealCell(x, y); // 탐색된 셀 좌표 반환
+            // 셀 열기 및 탐색된 셀들 갱신
+            auto revealedCells = logic.RevealCell(x, y);
             for (const auto& cell : revealedCells) {
                 RECT cellRect = {
                     cell.first * CELL_WIDTH,
-                    cell.second * CELL_HEIGHT + 100, // UI 영역 보정
+                    cell.second * CELL_HEIGHT + 100,
                     (cell.first + 1) * CELL_WIDTH,
                     (cell.second + 1) * CELL_HEIGHT + 100
                 };
-                InvalidateRect(hWnd, &cellRect, TRUE); // 탐색된 각 셀 갱신
+                InvalidateRect(hWnd, &cellRect, TRUE);
             }
 
             // 게임 오버 확인
             if (logic.IsGameOver()) {
-                // 모든 지뢰 드러내기
                 for (int row = 0; row < logic.GetBoard().size(); ++row) {
                     for (int col = 0; col < logic.GetBoard()[0].size(); ++col) {
                         if (logic.GetBoard()[row][col].isMine) {
@@ -301,26 +299,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 (col + 1) * CELL_WIDTH,
                                 (row + 1) * CELL_HEIGHT + 100
                             };
-                            InvalidateRect(hWnd, &cellRect, TRUE); // 지뢰를 화면에 갱신
+                            InvalidateRect(hWnd, &cellRect, TRUE);
                         }
                     }
                 }
 
-                // 게임 오버 메시지 표시
-                if (MessageBox(hWnd, L"Game Over!", L"Game Over", MB_ICONERROR | MB_OK) == IDOK) {
-                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0); // 리셋 버튼 기능 실행
+                if (MessageBox(hWnd, L"패배", L"패배", MB_ICONERROR | MB_OK) == IDOK) {
+                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0);
                 }
             }
             // 게임 승리 확인
             else if (logic.IsGameWon()) {
-                // 게임 승리 메시지 표시
-                if (MessageBox(hWnd, L"Congratulations!", L"Victory", MB_ICONINFORMATION | MB_OK) == IDOK) {
-                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0); // 리셋 버튼 기능 실행
+                if (MessageBox(hWnd, L"승리", L"승리", MB_ICONINFORMATION | MB_OK) == IDOK) {
+                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0);
                 }
             }
         }
         break;
     }
+
 
 
 
