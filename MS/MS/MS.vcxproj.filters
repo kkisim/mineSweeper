@@ -44,10 +44,10 @@
     <ClCompile Include="Ms_Interface.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Ms_Level.cpp">
+    <ClCompile Include="Ms_Logic.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Ms_Logic.cpp">
+    <ClCompile Include="MS_Level.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

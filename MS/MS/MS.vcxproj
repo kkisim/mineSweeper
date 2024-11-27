@@ -138,7 +138,7 @@
   <ItemGroup>
     <ClCompile Include="MS.cpp" />
     <ClCompile Include="Ms_Interface.cpp" />
-    <ClCompile Include="Ms_Level.cpp" />
+    <ClCompile Include="MS_Level.cpp" />
     <ClCompile Include="Ms_Logic.cpp" />
   </ItemGroup>
   <ItemGroup>
