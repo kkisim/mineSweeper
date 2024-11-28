@@ -21,11 +21,14 @@ void Ms_Logic::InitializeBoard() {
             mineField[i][j].isFlagged = false;       // 깃발 상태 초기화
             mineField[i][j].surroundingMines = 0;    // 주변 지뢰 개수 초기화
             mineField[i][j].isClicked = false;       // 클릭 상태 초기화
+            mineField[i][j].isQMark = false;         // 물음표 상태 초기화
         }
     }
 }
 
-// 지뢰 배치: 보드에 지뢰를 무작위로 배치
+
+
+ // 지뢰 배치: 보드에 지뢰를 무작위로 배치
 void Ms_Logic::PlaceMines(int startX, int startY, int exclusionRadius) {
     srand(static_cast<unsigned>(time(0))); // 랜덤 시드 설정
     int placedMines = 0;
@@ -43,6 +46,7 @@ void Ms_Logic::PlaceMines(int startX, int startY, int exclusionRadius) {
         }
     }
 }
+
 
 // 주변 지뢰 개수 계산: 각 셀에 인접한 지뢰 개수를 계산
 void Ms_Logic::CalculateSurroundingMines() {
@@ -173,20 +177,31 @@ void Ms_Logic::RevealAdjacentCellsDFS(int x, int y, std::vector<std::pair<int, i
 }
 
 // 깃발 설정/해제
+// 깃발 및 물음표 설정/해제
 void Ms_Logic::ToggleFlag(int x, int y) {
     if (x < 0 || x >= width || y < 0 || y >= height || mineField[y][x].isRevealed) {
-        return;
+        return; // 경계 초과 또는 이미 열려 있는 셀은 무시
     }
 
     if (mineField[y][x].isFlagged) {
+        // 깃발에서 물음표로 전환
         mineField[y][x].isFlagged = false;
-        remainingMines++;
+        mineField[y][x].isQMark = true;
+        remainingMines++; // 깃발 해제 → 지뢰 개수 증가
+    }
+    else if (mineField[y][x].isQMark) {
+        // 물음표에서 기본 상태로 전환
+        mineField[y][x].isQMark = false;
     }
     else {
+        // 기본 상태에서 깃발로 전환
         mineField[y][x].isFlagged = true;
-        remainingMines--;
+        remainingMines--; // 깃발 설정 → 지뢰 개수 감소
     }
 }
+
+
+
 
 // 게임 종료 여부 반환
 bool Ms_Logic::IsGameOver() const {
@@ -238,7 +253,7 @@ int Ms_Logic::GetRemainingMines() const {
 }
 
 
-// Ms_Logic.cpp에 정의 추가
+
 void Ms_Logic::ResetGameState() {
     gameOver = false;  // 게임 오버 상태 초기화
     gameWon = false;   // 게임 승리 상태 초기화

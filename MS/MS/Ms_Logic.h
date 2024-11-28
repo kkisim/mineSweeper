@@ -7,6 +7,7 @@ struct Cell {
     bool isMine;            // 지뢰 여부
     bool isRevealed;        // 셀이 열렸는지 여부
     bool isFlagged;         // 깃발 표시 여부
+    bool isQMark = false;  // 물음표 상태 추가
     int surroundingMines;   // 주변 지뢰 개수
     bool isClicked;         // 클릭 상태 여부
 };
@@ -25,22 +26,19 @@ public:
 
     /**
      * @brief 보드를 초기화합니다.
-     *        모든 셀을 기본 상태로 설정하고 초기화합니다.
      */
     void InitializeBoard();
 
     /**
      * @brief 특정 위치와 반경을 제외하고 지뢰를 배치합니다.
-     *        첫 번째 클릭 시 안전 영역을 보장합니다.
      * @param startX 시작 위치 X 좌표
      * @param startY 시작 위치 Y 좌표
-     * @param exclusionRadius 제외 반경 (안전 영역 크기)
+     * @param exclusionRadius 제외 반경
      */
     void PlaceMines(int startX, int startY, int exclusionRadius);
 
     /**
      * @brief 각 셀의 주변 지뢰 개수를 계산합니다.
-     *        모든 셀에 대해 주변 8칸을 확인합니다.
      */
     void CalculateSurroundingMines();
 
@@ -54,7 +52,6 @@ public:
 
     /**
      * @brief 특정 셀에 깃발을 설정하거나 해제합니다.
-     *        깃발을 토글하여 표시하거나 취소합니다.
      * @param x 셀의 X 좌표
      * @param y 셀의 Y 좌표
      */
@@ -80,14 +77,12 @@ public:
 
     /**
      * @brief 남은 지뢰 개수를 반환합니다.
-     *        깃발 표시 여부에 따라 동적으로 계산됩니다.
      * @return 남은 지뢰 개수
      */
     int GetRemainingMines() const;
 
     /**
      * @brief 특정 셀의 클릭 상태를 설정합니다.
-     *        셀을 강조 표시하는 데 사용됩니다.
      * @param x 셀의 X 좌표
      * @param y 셀의 Y 좌표
      * @param clicked 클릭 여부
@@ -96,7 +91,6 @@ public:
 
     /**
      * @brief 게임 상태를 초기화합니다.
-     *        게임 종료, 승리 여부, 지뢰 배치 등을 재설정합니다.
      */
     void ResetGameState(); // **새롭게 추가된 메서드 선언**
 
@@ -107,7 +101,7 @@ private:
     int remainingMines;                       // 남은 지뢰 개수
     bool gameOver;                            // 게임 종료 여부
     bool gameWon;                             // 게임 승리 여부
-    bool useBFS;                              // BFS 또는 DFS 탐색 방식 선택
+    bool useBFS;                              // BFS 또는 DFS 선택 여부
     std::vector<std::vector<Cell>> mineField; // 보드 상태를 저장하는 2D 배열
 
     /**
@@ -128,7 +122,6 @@ private:
 
     /**
      * @brief 승리 조건을 확인합니다.
-     *        모든 비지뢰 셀이 열렸는지 확인합니다.
      */
     void CheckWinCondition();
 };
