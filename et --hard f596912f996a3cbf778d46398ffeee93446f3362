@@ -1,0 +1,120 @@
+[33mcommit a63ba6b9698cfa9505becf757598d4fe3a5a48ac[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 14:25:25 2024 +0900
+
+    제발 exe 올라가라
+
+[33mcommit e00c4346d36114c9af26b712cb8b46b2fc2fa31c[m
+Merge: 16a5775 f596912
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 12:10:27 2024 +0900
+
+    병합
+
+[33mcommit 16a5775e8f7ef595a80ec70000f95885b357b7a4[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 12:04:34 2024 +0900
+
+    exe 파일 생성
+
+[33mcommit f596912f996a3cbf778d46398ffeee93446f3362[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 11:51:33 2024 +0900
+
+    Update README.md
+
+[33mcommit 63ebdff949e1e8afb601306039ee890d5d8f5cde[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 11:29:39 2024 +0900
+
+    수정
+
+[33mcommit 405a1382af7b367d37c4472b4561ebfc500f9a04[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 11:20:27 2024 +0900
+
+    read.md 작성
+
+[33mcommit cda5fa551abb2510c37ef77ec2747a7df902b229[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 11:09:39 2024 +0900
+
+    최종본
+
+[33mcommit f7ff6d6a5d1a119f4ec585bd22dbc20db3814886[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Thu Nov 28 10:20:59 2024 +0900
+
+    버그 수정
+
+[33mcommit 075fe8333a2e73c190feea3211d474faee35c6d9[m[33m ([m[1;31morigin/develop[m[33m)[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Wed Nov 27 21:43:21 2024 +0900
+
+    지뢰개수 변경 가능
+
+[33mcommit a0243610513b58994222fbb88deae0c5d5884d98[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Mon Nov 25 13:17:54 2024 +0900
+
+    승리구현
+
+[33mcommit 7adf903829c70c4f17bf75b6efb6a4afd431fdba[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Sat Nov 23 21:33:44 2024 +0900
+
+    이미지 수정및 버그 수정
+
+[33mcommit d2bdf18c03384442f5dbcac6112b135b733b1789[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Fri Nov 22 20:16:23 2024 +0900
+
+    이제 게임오버 로직만들어야함
+
+[33mcommit 11dbccc06b6dec5dc56591998b9fe980a1168150[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Thu Nov 21 10:21:13 2024 +0900
+
+     타이머 수정
+
+[33mcommit 6caf503aaba4d1d111281c2f1bb7930e0ec9c8f0[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Thu Nov 21 00:50:41 2024 +0900
+
+    로직단순구현
+
+[33mcommit 846c368951de42e0d871906f8eb84822e3ad1378[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Wed Nov 20 02:45:15 2024 +0900
+
+    인터폐이스 일뿌 쑤정
+
+[33mcommit 5d7d5abf5c981befc4cadb86f6d50397f0d8c65a[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Mon Nov 18 15:42:51 2024 +0900
+
+    인터페이스 추가
+
+[33mcommit 1f40c6fc0e0ce712715d070f4701ba9ed3881bb4[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Mon Nov 18 15:12:17 2024 +0900
+
+    오류수정 2
+
+[33mcommit 2b721376e91853e884f4d5f343a17bac3a4ad148[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Mon Nov 18 15:07:17 2024 +0900
+
+    오류수정
+
+[33mcommit 732df5fe82149150ea143c9048bd97ffa2551510[m
+Author: kkisim <kisimoko@gmail.com>
+Date:   Mon Nov 18 14:45:47 2024 +0900
+
+    난이도 설정
+
+[33mcommit 29be8748cac5abb6d4b3abe4fe6e16113b3afc13[m
+Author: kkisim <163362240+kkisim@users.noreply.github.com>
+Date:   Mon Nov 18 13:03:10 2024 +0900
+
+    Initial commit

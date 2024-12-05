@@ -1,0 +1,16 @@
+﻿  MS.cpp
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(222,35): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(222,69): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(249,35): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(249,69): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(266,39): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(267,43): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(303,35): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(303,69): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(464,27): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Users\kisim\Desktop\기말\vcpp-project\MS\MS\MS.cpp(465,31): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+  Ms_Interface.cpp
+  Ms_Level.cpp
+  Ms_Logic.cpp
+  코드를 생성하고 있습니다...
+  MS.vcxproj -> C:\Users\kisim\Desktop\기말\vcpp-project\MS\Debug\MS.exe

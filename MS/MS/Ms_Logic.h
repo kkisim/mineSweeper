@@ -94,6 +94,9 @@ public:
      */
     void ResetGameState(); // **새롭게 추가된 메서드 선언**
 
+    //bool IsFirstClick() const;             // 첫 클릭 여부 반환
+    //void SetFirstClick(bool value);        // 첫 클릭 여부 설정
+
 private:
     int width;                                // 보드의 가로 크기
     int height;                               // 보드의 세로 크기
@@ -103,7 +106,7 @@ private:
     bool gameWon;                             // 게임 승리 여부
     bool useBFS;                              // BFS 또는 DFS 선택 여부
     std::vector<std::vector<Cell>> mineField; // 보드 상태를 저장하는 2D 배열
-
+    //bool isFirstClick = true;
     /**
      * @brief DFS를 사용하여 빈 칸 주변을 탐색하고 셀을 엽니다.
      * @param x 셀의 X 좌표

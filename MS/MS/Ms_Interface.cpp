@@ -128,6 +128,7 @@ void InitializeBoard(HDC hdc,  Ms_level& level, Ms_Logic& logic) {
             else {
                 if (board[i][j].isFlagged) {
                     DrawFlag(hdc, hFlagBitmap, x, y); // ±ê¹ß ·»´õ¸µ
+                
                 }
                 else {
                     DrawCell(hdc, false, x, y); // ´ÝÈù ¼¿ ·»´õ¸µ

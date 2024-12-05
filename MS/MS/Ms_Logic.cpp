@@ -39,6 +39,7 @@ void Ms_Logic::PlaceMines(int startX, int startY, int exclusionRadius) {
 
         // 배치 조건: 지뢰가 없는 셀이고, 시작 위치 및 반경 제외
         if (!mineField[y][x].isMine &&
+            //(startX == -1 || startY == -1 || // 처음 클릭하지 않은 상태에서는 제한 없음
             !(x >= startX - exclusionRadius && x <= startX + exclusionRadius &&
                 y >= startY - exclusionRadius && y <= startY + exclusionRadius)) {
             mineField[y][x].isMine = true; // 지뢰 배치
@@ -97,7 +98,7 @@ std::vector<std::pair<int, int>> Ms_Logic::RevealCell(int x, int y) {
                 }
             }
         }
-
+        CheckWinCondition();
         return revealedCells; // 지뢰를 클릭했으므로 탐색을 종료하고 반환합니다.
     }
 
@@ -152,6 +153,7 @@ void Ms_Logic::RevealAdjacentCellsBFS(int x, int y, std::vector<std::pair<int, i
             }
         }
     }
+  
 }
 
 // DFS 탐색: 빈 칸 주변 열기
@@ -174,6 +176,7 @@ void Ms_Logic::RevealAdjacentCellsDFS(int x, int y, std::vector<std::pair<int, i
             }
         }
     }
+  
 }
 
 // 깃발 설정/해제
@@ -188,16 +191,21 @@ void Ms_Logic::ToggleFlag(int x, int y) {
         mineField[y][x].isFlagged = false;
         mineField[y][x].isQMark = true;
         remainingMines++; // 깃발 해제 → 지뢰 개수 증가
+        
     }
     else if (mineField[y][x].isQMark) {
         // 물음표에서 기본 상태로 전환
         mineField[y][x].isQMark = false;
+       
     }
     else {
         // 기본 상태에서 깃발로 전환
         mineField[y][x].isFlagged = true;
+        
         remainingMines--; // 깃발 설정 → 지뢰 개수 감소
+       
     }
+    CheckWinCondition();
 }
 
 
@@ -220,15 +228,16 @@ void Ms_Logic::CheckWinCondition() {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             // 지뢰가 아닌 셀은 반드시 열려 있어야 함
-            if (!mineField[y][x].isMine && !mineField[y][x].isRevealed) {
+            if (!mineField[y][x].isMine && !mineField[y][x].isRevealed ) {
                 gameWon = false;
                 return;
             }
             // 지뢰가 있는 셀은 반드시 깃발이 꽂혀 있어야 함
-            if (mineField[y][x].isMine && !mineField[y][x].isFlagged) {
+            if ((mineField[y][x].isMine && !mineField[y][x].isFlagged) ) {
                 gameWon = false;
                 return;
             }
+
         }
     }
 }
@@ -245,12 +254,16 @@ void Ms_Logic::SetCellClicked(int x, int y, bool clicked) {
     if (x >= 0 && x < width && y >= 0 && y < height) {
         mineField[y][x].isClicked = clicked;
     }
+   
 }
 
 // 남은 지뢰 개수 반환
 int Ms_Logic::GetRemainingMines() const {
+
     return remainingMines;
+
 }
+
 
 
 
@@ -259,3 +272,12 @@ void Ms_Logic::ResetGameState() {
     gameWon = false;   // 게임 승리 상태 초기화
     remainingMines = mineCount;  // 남은 지뢰 개수 초기화
 }
+
+//// Ms_Logic 클래스 내부
+//bool Ms_Logic::IsFirstClick() const {
+//    return isFirstClick;
+//}
+//
+//void Ms_Logic::SetFirstClick(bool value) {
+//    isFirstClick = value;
+//}

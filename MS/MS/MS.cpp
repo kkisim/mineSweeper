@@ -185,20 +185,20 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow) {
 }
 
 
-void ChangeLevel(HWND hWnd, const Ms_level& newLevel, bool useBFS) {
-    currentLevel = newLevel; // 객체 복사
-    timerCount = 0;
-
-    // Ms_Logic 객체 재생성
-    logic = Ms_Logic(currentLevel.getWidth(), currentLevel.getHeight(), currentLevel.getMines(), useBFS);
-    logic.InitializeBoard();
-    logic.PlaceMines(-1, -1, 0);
-    logic.CalculateSurroundingMines();
-
-    // 창 크기 재조정 및 UI 갱신
-    ResizeWindow(hWnd, currentLevel);
-    InvalidateRect(hWnd, NULL, TRUE);
-}
+//void ChangeLevel(HWND hWnd, const Ms_level& newLevel, bool useBFS) {
+//    currentLevel = newLevel; // 객체 복사
+//    timerCount = 0;
+//
+//    // Ms_Logic 객체 재생성
+//    logic = Ms_Logic(currentLevel.getWidth(), currentLevel.getHeight(), currentLevel.getMines(), useBFS);
+//    logic.InitializeBoard();
+//    logic.PlaceMines(-1, -1, 0);
+//    logic.CalculateSurroundingMines();
+//
+//    // 창 크기 재조정 및 UI 갱신
+//    ResizeWindow(hWnd, currentLevel);
+//    InvalidateRect(hWnd, NULL, TRUE);
+//}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -226,7 +226,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (clickedCell.isFlagged || (clickedCell.isRevealed && clickedCell.surroundingMines > 0)) {
                 break;
             }
-
+            //// 첫 클릭이라면 지뢰 배치
+            //if (logic.IsFirstClick()) {
+            //    logic.PlaceMines(x, y, 1); // 첫 클릭 위치와 반경 1 제외
+            //    logic.CalculateSurroundingMines(); // 주변 지뢰 수 계산
+            //    logic.SetFirstClick(false); // 첫 클릭 완료 플래그 설정
+            //}
             logic.SetCellClicked(x, y, true); // 셀을 눌린 상태로 설정
 
             // 클릭된 셀만 갱신
@@ -249,6 +254,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (y >= 0 && x >= 0 && x < logic.GetBoard()[0].size() && y < logic.GetBoard().size()) {
             logic.SetCellClicked(x, y, false); // 클릭 상태 해제
 
+
             // 셀 열기 및 탐색된 셀들 갱신
             auto revealedCells = logic.RevealCell(x, y);
             for (const auto& cell : revealedCells) {
@@ -258,6 +264,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     (cell.first + 1) * CELL_WIDTH,
                     (cell.second + 1) * CELL_HEIGHT + 100
                 };
+
                 InvalidateRect(hWnd, &cellRect, TRUE);
             }
 
@@ -334,12 +341,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             // 백 버퍼에서 실제 화면으로 출력
             BitBlt(hdc, minesRect.left, minesRect.top, minesRect.right - minesRect.left, minesRect.bottom - minesRect.top, memDC, 0, 0, SRCCOPY);
+            // 게임 오버 확인
+            if (logic.IsGameOver()) {
+                for (int row = 0; row < logic.GetBoard().size(); ++row) {
+                    for (int col = 0; col < logic.GetBoard()[0].size(); ++col) {
+                        if (logic.GetBoard()[row][col].isMine) {
+                            RECT cellRect = {
+                                col * CELL_WIDTH,
+                                row * CELL_HEIGHT + 100,
+                                (col + 1) * CELL_WIDTH,
+                                (row + 1) * CELL_HEIGHT + 100
+                            };
+                            InvalidateRect(hWnd, &cellRect, TRUE);
+                        }
+                    }
+                }
 
+                if (MessageBox(hWnd, L"패배", L"패배", MB_ICONERROR | MB_OK) == IDOK) {
+                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0);
+                }
+            }
+            // 게임 승리 확인
+            else if (logic.IsGameWon()) {
+                if (MessageBox(hWnd, L"승리", L"승리", MB_ICONINFORMATION | MB_OK) == IDOK) {
+                    SendMessage(hWnd, WM_COMMAND, ID_BUTTON_RESET, 0);
+                }
+            }
             // 리소스 해제
             SelectObject(memDC, oldBitmap);
             DeleteObject(hBitmap);
             DeleteDC(memDC);
+
             ReleaseDC(hWnd, hdc);
+
         }
         break;
     }
