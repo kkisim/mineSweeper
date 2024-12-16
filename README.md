@@ -1,5 +1,4 @@
 # vcpp-project
-# vcpp-project
 
 ## 🎮 지뢰찾기 프로젝트 (Minesweeper)
 
